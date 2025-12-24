@@ -1,0 +1,67 @@
+
+@import "tailwindcss";
+
+
+:root {
+ 
+  --background:  #F7F6F3;
+  --foreground:  #2E2E2E;
+
+  --card:  #FFFFFF;
+  --card-foreground:  #2E2E2E;
+
+  --border:  #E5E1D8;
+
+  --accent:  #8FAF9A;
+  --accent-foreground:  #FFFFFF;
+}
+
+.dark {
+
+  --background:  #121212;
+  --foreground:  #E6E3DC;
+
+  --card:  #1C1C1C;
+  --card-foreground:  #E6E3DC;
+  --border:  #2A2A2A;
+
+  --accent:  #7FA58C;
+  --accent-foreground:  #121212;
+}
+
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+::view-transition-old(root) {
+  animation: vt-out 220ms ease-in both;
+}
+
+::view-transition-new(root) {
+  animation: vt-in 220ms ease-out both;
+}
+
+@keyframes vt-out {
+  from { opacity: 1; filter: blur(0px); transform: translateY(0px); }
+  to   { opacity: 0; filter: blur(10px); transform: translateY(-6px); }
+}
+
+@keyframes vt-in {
+  from { opacity: 0; filter: blur(10px); transform: translateY(6px); }
+  to   { opacity: 1; filter: blur(0px); transform: translateY(0px); }
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
+}
+
