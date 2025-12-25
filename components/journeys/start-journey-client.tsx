@@ -36,7 +36,6 @@ export function StartJourneyClient({ slug }: { slug: string }) {
 
         const firstStepId = journey.steps[0].id;
 
-        // localStorage can throw (Safari private / blocked storage)
         let existing = null as ReturnType<typeof loadProgress>;
 
         try {
@@ -46,12 +45,11 @@ export function StartJourneyClient({ slug }: { slug: string }) {
             setPhase("no-storage");
             setNote("Storage is unavailable. Starting without saving progress…");
           }
-          // Still allow the journey to start
+          
           router.replace(`/journeys/${journey.slug}/step/${firstStepId}`);
           return;
         }
 
-        // Continue if we can
         if (existing?.currentStepId) {
           setPhase("continuing");
           setNote("Continuing where you left off…");
@@ -59,7 +57,6 @@ export function StartJourneyClient({ slug }: { slug: string }) {
           return;
         }
 
-        // Start fresh if we can
         setPhase("starting");
         setNote("Starting your first step…");
 
@@ -147,7 +144,7 @@ function ProgressSparkle({ phase }: { phase: Phase }) {
           className="absolute left-0 top-0 h-full rounded-full bg-[var(--accent)] transition-all duration-500"
           style={{ width: `${percent}%` }}
         />
-        {/* tiny sparkle */}
+        
         <div
           className="absolute top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-[var(--accent-foreground)] opacity-70 transition-all duration-500"
           style={{ left: `calc(${percent}% - 6px)` }}

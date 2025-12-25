@@ -44,6 +44,8 @@ function StepContent({ content }: { content: string }) {
         const isPractice =
           lower.startsWith("practice") ||
           lower.startsWith("try this") ||
+          lower.startsWith("pick one") ||
+          lower.startsWith("try") ||
           lower.startsWith("try “three good things”") ||
           lower.startsWith("try 'three good things'");
 
@@ -384,7 +386,7 @@ export function JourneyStepClient({
                   Saved: {savedAt}
                 </span>
               ) : null}
-              
+
               <AnimatePresence mode="wait" initial={false}>
                 {saveState === "saving" ? (
                   <motion.span
