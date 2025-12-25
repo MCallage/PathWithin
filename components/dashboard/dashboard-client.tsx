@@ -66,6 +66,8 @@ type Summary = {
   daysSinceLastActivity: number | null;
 };
 
+const EASE_OUT: [number, number, number, number] = [0.16, 1, 0.3, 1];
+
 function formatDate(iso: string) {
   try {
     return new Date(iso).toLocaleString();
@@ -114,13 +116,11 @@ function DashboardSessionSkeleton() {
 function DashboardHydrationSkeleton() {
   return (
     <div className="space-y-8">
-      {/* Header */}
       <div className="space-y-3">
         <div className="h-8 w-44 rounded bg-[var(--secondary)] animate-pulse" />
         <div className="h-4 w-96 rounded bg-[var(--secondary)] animate-pulse" />
       </div>
 
-      {/* Summary cards */}
       <div className="grid gap-4 sm:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <div
@@ -133,7 +133,6 @@ function DashboardHydrationSkeleton() {
         ))}
       </div>
 
-      {/* Big card */}
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6">
         <div className="h-4 w-28 rounded bg-[var(--secondary)] animate-pulse" />
         <div className="mt-3 h-4 w-80 rounded bg-[var(--secondary)] animate-pulse" />
@@ -312,7 +311,7 @@ function DashboardInner({ session }: { session: any }) {
     weekAgo.setDate(now.getDate() - 7);
 
     for (const j of journeys) {
-      const prog = loadProgress(j.slug); // safe with your new progress.ts
+      const prog = loadProgress(j.slug);
       const journey = getJourneyBySlug(j.slug) ?? j;
       if (!journey) continue;
 
@@ -451,7 +450,6 @@ function DashboardInner({ session }: { session: any }) {
       window.removeEventListener("focus", onFocus);
       document.removeEventListener("visibilitychange", onVis);
     };
-
   }, []);
 
   function resetProgress(slug: string) {
@@ -484,7 +482,7 @@ function DashboardInner({ session }: { session: any }) {
     hidden: reduce ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 },
     show: reduce
       ? { opacity: 1, y: 0 }
-      : { opacity: 1, y: 0, transition: { duration: 0.35, ease: "easeOut" } },
+      : { opacity: 1, y: 0, transition: { duration: 0.35, ease: EASE_OUT } },
   };
 
   const hoverLift = reduce ? undefined : { y: -2 };
@@ -497,7 +495,7 @@ function DashboardInner({ session }: { session: any }) {
         <motion.div
           className="space-y-8"
           variants={container}
-          initial="hidden"
+          initial={reduce ? false : "hidden"}
           animate="show"
         >
           <motion.header variants={fadeUp}>
@@ -527,14 +525,18 @@ function DashboardInner({ session }: { session: any }) {
 
           <motion.section variants={fadeUp} className="grid gap-4 sm:grid-cols-4">
             <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5">
-              <p className="text-xs text-[var(--muted-foreground)]">Total progress</p>
+              <p className="text-xs text-[var(--muted-foreground)]">
+                Total progress
+              </p>
               <p className="mt-2 text-2xl font-semibold text-[var(--foreground)]">
                 {summary.totalProgress}%
               </p>
             </div>
 
             <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5">
-              <p className="text-xs text-[var(--muted-foreground)]">Active journeys</p>
+              <p className="text-xs text-[var(--muted-foreground)]">
+                Active journeys
+              </p>
               <p className="mt-2 text-2xl font-semibold text-[var(--foreground)]">
                 {summary.activeCount}
               </p>
@@ -548,7 +550,9 @@ function DashboardInner({ session }: { session: any }) {
             </div>
 
             <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5">
-              <p className="text-xs text-[var(--muted-foreground)]">Weekly consistency</p>
+              <p className="text-xs text-[var(--muted-foreground)]">
+                Weekly consistency
+              </p>
               <p className="mt-2 text-2xl font-semibold text-[var(--foreground)]">
                 {summary.updatedThisWeek}
               </p>
@@ -583,7 +587,13 @@ function DashboardInner({ session }: { session: any }) {
                 No recent activity yet.
               </div>
             ) : (
-              <motion.div className="grid gap-4 sm:grid-cols-2" variants={container}>
+              <motion.div
+                className="grid gap-4 sm:grid-cols-2"
+                variants={container}
+                initial={reduce ? false : "hidden"}
+                whileInView="show"
+                viewport={{ once: true, amount: 0.2 }}
+              >
                 {recents.map((r) => (
                   <motion.div
                     key={r.slug}
@@ -655,7 +665,6 @@ function DashboardInner({ session }: { session: any }) {
             )}
           </motion.section>
 
-        
           <motion.section
             variants={fadeUp}
             whileHover={hoverLift}
@@ -673,7 +682,7 @@ function DashboardInner({ session }: { session: any }) {
                       initial={reduce ? false : { opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={reduce ? { opacity: 0 } : { opacity: 0, y: -8 }}
-                      transition={{ duration: reduce ? 0 : 0.22, ease: "easeOut" }}
+                      transition={{ duration: reduce ? 0 : 0.22, ease: EASE_OUT }}
                     >
                       <h2 className="mt-2 text-xl font-semibold">
                         {continueItem.title}
@@ -692,7 +701,7 @@ function DashboardInner({ session }: { session: any }) {
                       initial={reduce ? false : { opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={reduce ? { opacity: 0 } : { opacity: 0, y: -8 }}
-                      transition={{ duration: reduce ? 0 : 0.22, ease: "easeOut" }}
+                      transition={{ duration: reduce ? 0 : 0.22, ease: EASE_OUT }}
                     >
                       No saved progress yet. Pick a journey to begin.
                     </motion.p>
@@ -709,7 +718,7 @@ function DashboardInner({ session }: { session: any }) {
                       initial={reduce ? false : { opacity: 0, y: 6 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={reduce ? { opacity: 0 } : { opacity: 0, y: -6 }}
-                      transition={{ duration: reduce ? 0 : 0.2, ease: "easeOut" }}
+                      transition={{ duration: reduce ? 0 : 0.2, ease: EASE_OUT }}
                     >
                       <Link
                         href={`/journeys/${continueItem.slug}/start`}
@@ -735,7 +744,7 @@ function DashboardInner({ session }: { session: any }) {
                       initial={reduce ? false : { opacity: 0, y: 6 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={reduce ? { opacity: 0 } : { opacity: 0, y: -6 }}
-                      transition={{ duration: reduce ? 0 : 0.2, ease: "easeOut" }}
+                      transition={{ duration: reduce ? 0 : 0.2, ease: EASE_OUT }}
                     >
                       <Link
                         href="/journeys"
@@ -756,7 +765,7 @@ function DashboardInner({ session }: { session: any }) {
                   initial={reduce ? false : { opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={reduce ? { opacity: 0 } : { opacity: 0, y: -8 }}
-                  transition={{ duration: reduce ? 0 : 0.22, ease: "easeOut" }}
+                  transition={{ duration: reduce ? 0 : 0.22, ease: EASE_OUT }}
                   className="mt-6"
                 >
                   <div className="mb-2 flex items-center justify-between">
@@ -799,7 +808,7 @@ function DashboardInner({ session }: { session: any }) {
               <motion.div
                 className="grid gap-4 sm:grid-cols-2"
                 variants={container}
-                initial="hidden"
+                initial={reduce ? false : "hidden"}
                 animate="show"
               >
                 {recentNotes.map((n) => (
@@ -809,7 +818,10 @@ function DashboardInner({ session }: { session: any }) {
                     whileHover={hoverLift}
                     transition={{ type: "spring", stiffness: 450, damping: 32 }}
                   >
-                    <Link href={`/journeys/${n.slug}/step/${n.stepId}`} className="block">
+                    <Link
+                      href={`/journeys/${n.slug}/step/${n.stepId}`}
+                      className="block"
+                    >
                       <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 hover:opacity-90">
                         <div className="flex items-start justify-between gap-3">
                           <div>
