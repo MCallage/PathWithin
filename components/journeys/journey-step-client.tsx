@@ -16,6 +16,8 @@ import {
   useReducedMotion,
 } from "framer-motion";
 
+const EASE_OUT: [number, number, number, number] = [0.16, 1, 0.3, 1];
+
 function StepContent({ content }: { content: string }) {
   const reduce = useReducedMotion();
 
@@ -28,7 +30,7 @@ function StepContent({ content }: { content: string }) {
     hidden: reduce ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 },
     show: reduce
       ? { opacity: 1, y: 0 }
-      : { opacity: 1, y: 0, transition: { duration: 0.25, ease: "easeOut" } },
+      : { opacity: 1, y: 0, transition: { duration: 0.25, ease: EASE_OUT } },
   };
 
   return (
@@ -245,15 +247,8 @@ export function JourneyStepClient({
 
   const isCompleted = completedIds.includes(step.id);
 
-  const pageTransition = {
-    initial: reduce ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 },
-    animate: { opacity: 1, y: 0 },
-    exit: reduce ? { opacity: 0 } : { opacity: 0, y: -10 },
-  };
-
   return (
     <MotionConfig reducedMotion="user">
-    
       <AnimatePresence mode="wait" initial={false}>
         <motion.div
           key={step.id}
@@ -261,9 +256,9 @@ export function JourneyStepClient({
           initial={reduce ? { opacity: 1 } : { opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           exit={reduce ? { opacity: 0 } : { opacity: 0 }}
-          transition={{ duration: reduce ? 0 : 0.18, ease: "easeOut" }}
+          transition={{ duration: reduce ? 0 : 0.18, ease: EASE_OUT }}
           className="space-y-6 min-h-[60vh]"
-          >
+        >
           <Link
             href={`/journeys/${journey.slug}`}
             className="text-sm text-[var(--muted-foreground)] hover:underline"
@@ -286,19 +281,18 @@ export function JourneyStepClient({
                 className="h-full rounded-full bg-[var(--accent)]"
                 initial={false}
                 animate={{ width: `${percent}%` }}
-                transition={{ duration: reduce ? 0 : 0.5, ease: "easeOut" }}
+                transition={{ duration: reduce ? 0 : 0.5, ease: EASE_OUT }}
               />
             </div>
           </div>
 
-         
           <AnimatePresence initial={false}>
             {isCompleted ? (
               <motion.div
                 initial={reduce ? false : { opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={reduce ? { opacity: 0 } : { opacity: 0, y: -6 }}
-                transition={{ duration: reduce ? 0 : 0.18, ease: "easeOut" }}
+                transition={{ duration: reduce ? 0 : 0.18, ease: EASE_OUT }}
                 className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--secondary)] px-3 py-1 text-xs"
               >
                 <span className="h-2 w-2 rounded-full bg-[var(--accent)]" />

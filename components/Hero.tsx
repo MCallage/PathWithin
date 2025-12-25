@@ -3,15 +3,15 @@
 import Link from "next/link";
 import { motion, MotionConfig, useReducedMotion } from "framer-motion";
 
+const EASE_OUT: [number, number, number, number] = [0.16, 1, 0.3, 1];
+
 export function Hero() {
   const reduce = useReducedMotion();
 
   const container = {
     hidden: {},
     show: {
-      transition: reduce
-        ? {}
-        : { staggerChildren: 0.08, delayChildren: 0.05 },
+      transition: reduce ? {} : { staggerChildren: 0.08, delayChildren: 0.05 },
     },
   };
 
@@ -19,7 +19,11 @@ export function Hero() {
     hidden: reduce ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 },
     show: reduce
       ? { opacity: 1, y: 0 }
-      : { opacity: 1, y: 0, transition: { duration: 0.35, ease: "easeOut" } },
+      : {
+          opacity: 1,
+          y: 0,
+          transition: { duration: 0.35, ease: EASE_OUT },
+        },
   };
 
   return (
@@ -51,7 +55,10 @@ export function Hero() {
           Guided journeys to reconnect with yourself, one gentle step at a time.
         </motion.p>
 
-        <motion.div variants={item} className="mt-8 flex flex-col items-center gap-3">
+        <motion.div
+          variants={item}
+          className="mt-8 flex flex-col items-center gap-3"
+        >
           <Link href="/journeys" className="inline-flex">
             <motion.button
               type="button"

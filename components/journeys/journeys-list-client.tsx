@@ -11,6 +11,10 @@ import {
   useReducedMotion,
 } from "framer-motion";
 
+// TS-safe easings
+const EASE_OUT: [number, number, number, number] = [0.16, 1, 0.3, 1];
+const EASE_IN_OUT: [number, number, number, number] = [0.65, 0, 0.35, 1];
+
 export function JourneysListClient({ journeys }: { journeys: Journey[] }) {
   const { status } = useSession();
   const authed = status === "authenticated";
@@ -27,55 +31,54 @@ export function JourneysListClient({ journeys }: { journeys: Journey[] }) {
     hidden: reduce ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 },
     show: reduce
       ? { opacity: 1, y: 0 }
-      : { opacity: 1, y: 0, transition: { duration: 0.28, ease: "easeOut" } },
+      : { opacity: 1, y: 0, transition: { duration: 0.28, ease: EASE_OUT } },
   };
 
   return (
     <MotionConfig reducedMotion="user">
       <motion.div
         className="space-y-8"
+        variants={container}
         initial={reduce ? false : "hidden"}
         animate="show"
-        variants={container}
       >
         <motion.header
-            variants={item}
-            className="relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)] p-24
+          variants={item}
+          className="relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)] p-24"
+        >
+          <div
+            aria-hidden="true"
+            className="
+              pointer-events-none absolute inset-0
+              opacity-30
+              blur-[1px]
             "
-            >
-            <div
-                aria-hidden="true"
-                className="
-                pointer-events-none absolute inset-0
-                opacity-30
-                blur-[1px]
-                "
-                style={{
-                backgroundImage: "url(/journeyimage.jpg)",
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                backgroundRepeat: "no-repeat",
-                }}
-            />
+            style={{
+              backgroundImage: "url(/journeyimage.jpg)",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
+            }}
+          />
 
-            <div
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-0 bg-[var(--card)]/60"
-            />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 bg-[var(--card)]/60"
+          />
 
-            <div className="relative z-10">
-                <h1 className="text-3xl font-semibold">Journeys</h1>
-                <p className="mt-2 text-[var(--muted-foreground)]">
-                Choose a path. Some journeys are open, <br/>others are for members.
-                </p>
-            </div>
-            </motion.header>
-
+          <div className="relative z-10">
+            <h1 className="text-3xl font-semibold">Journeys</h1>
+            <p className="mt-2 text-[var(--muted-foreground)]">
+              Choose a path. Some journeys are open, <br />
+              others are for members.
+            </p>
+          </div>
+        </motion.header>
 
         <motion.div
           className="grid gap-4 sm:grid-cols-2"
           variants={container}
-          initial="hidden"
+          initial={reduce ? false : "hidden"}
           whileInView="show"
           viewport={{ once: true, amount: 0.2 }}
         >
@@ -89,16 +92,15 @@ export function JourneysListClient({ journeys }: { journeys: Journey[] }) {
                 variants={item}
                 whileHover={reduce ? undefined : { y: -2 }}
                 transition={{ type: "spring", stiffness: 450, damping: 32 }}
-                className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 relative overflow-hidden"
+                className="relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6"
               >
-                
                 {locked ? (
                   <motion.div
                     aria-hidden="true"
                     className="pointer-events-none absolute inset-0"
                     initial={{ opacity: 0 }}
                     whileHover={{ opacity: reduce ? 0 : 1 }}
-                    transition={{ duration: 0.15, ease: "easeOut" }}
+                    transition={{ duration: 0.15, ease: EASE_OUT }}
                   >
                     <motion.div
                       className="absolute inset-y-0 -left-1/2 w-[200%]"
@@ -110,15 +112,14 @@ export function JourneysListClient({ journeys }: { journeys: Journey[] }) {
                       whileHover={{ x: "20%" }}
                       transition={{
                         duration: 0.9,
-                        ease: "easeInOut",
+                        ease: EASE_IN_OUT,
                       }}
                     />
-                    {/* subtle veil to make shimmer visible on very bright cards */}
                     <div className="absolute inset-0 bg-[var(--background)] opacity-[0.02]" />
                   </motion.div>
                 ) : null}
 
-                <div className="flex items-start justify-between gap-3 relative">
+                <div className="relative flex items-start justify-between gap-3">
                   <div>
                     <h2 className="text-lg font-semibold">{j.title}</h2>
                     <p className="mt-1 text-sm text-[var(--muted-foreground)]">
@@ -135,7 +136,7 @@ export function JourneysListClient({ journeys }: { journeys: Journey[] }) {
                         exit={reduce ? { opacity: 0 } : { opacity: 0, y: -4 }}
                         transition={{
                           duration: reduce ? 0 : 0.16,
-                          ease: "easeOut",
+                          ease: EASE_OUT,
                         }}
                         className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--secondary)] px-3 py-1 text-xs"
                       >
@@ -150,7 +151,7 @@ export function JourneysListClient({ journeys }: { journeys: Journey[] }) {
                         exit={reduce ? { opacity: 0 } : { opacity: 0, y: -4 }}
                         transition={{
                           duration: reduce ? 0 : 0.16,
-                          ease: "easeOut",
+                          ease: EASE_OUT,
                         }}
                         className="inline-flex items-center rounded-full border border-[var(--border)] px-3 py-1 text-xs text-[var(--muted-foreground)]"
                       >
@@ -160,11 +161,11 @@ export function JourneysListClient({ journeys }: { journeys: Journey[] }) {
                   </AnimatePresence>
                 </div>
 
-                <p className="mt-4 text-sm text-[var(--muted-foreground)] relative">
+                <p className="relative mt-4 text-sm text-[var(--muted-foreground)]">
                   {j.description}
                 </p>
 
-                <div className="mt-4 flex flex-wrap gap-2 relative">
+                <div className="relative mt-4 flex flex-wrap gap-2">
                   {j.tags.map((t) => (
                     <span
                       key={t}
@@ -175,8 +176,7 @@ export function JourneysListClient({ journeys }: { journeys: Journey[] }) {
                   ))}
                 </div>
 
-                <div className="mt-6 flex flex-wrap gap-3 relative">
-                  
+                <div className="relative mt-6 flex flex-wrap gap-3">
                   <AnimatePresence mode="wait" initial={false}>
                     {locked ? (
                       <motion.button
@@ -186,7 +186,7 @@ export function JourneysListClient({ journeys }: { journeys: Journey[] }) {
                         exit={reduce ? { opacity: 0 } : { opacity: 0, y: -6 }}
                         transition={{
                           duration: reduce ? 0 : 0.18,
-                          ease: "easeOut",
+                          ease: EASE_OUT,
                         }}
                         whileTap={reduce ? undefined : { scale: 0.98 }}
                         onClick={() =>
@@ -204,7 +204,7 @@ export function JourneysListClient({ journeys }: { journeys: Journey[] }) {
                         exit={reduce ? { opacity: 0 } : { opacity: 0, y: -6 }}
                         transition={{
                           duration: reduce ? 0 : 0.18,
-                          ease: "easeOut",
+                          ease: EASE_OUT,
                         }}
                       >
                         <Link

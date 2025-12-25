@@ -3,7 +3,12 @@
 import { Link, useTransitionRouter } from "next-view-transitions";
 import { useSession, signIn } from "next-auth/react";
 import { FiLock } from "react-icons/fi";
-import { AnimatePresence, MotionConfig, motion, useReducedMotion } from "framer-motion";
+import {
+  AnimatePresence,
+  MotionConfig,
+  motion,
+  useReducedMotion,
+} from "framer-motion";
 
 type PathCardProps = {
   title: string;
@@ -12,7 +17,14 @@ type PathCardProps = {
   cta?: string;
 };
 
-function PathCard({ title, description, href, cta = "Start path" }: PathCardProps) {
+const EASE_OUT: [number, number, number, number] = [0.16, 1, 0.3, 1];
+
+function PathCard({
+  title,
+  description,
+  href,
+  cta = "Start path",
+}: PathCardProps) {
   const reduce = useReducedMotion();
 
   return (
@@ -23,7 +35,9 @@ function PathCard({ title, description, href, cta = "Start path" }: PathCardProp
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
-          <h3 className="text-base font-semibold text-[var(--foreground)]">{title}</h3>
+          <h3 className="text-base font-semibold text-[var(--foreground)]">
+            {title}
+          </h3>
           <p className="mt-1 text-sm leading-relaxed text-[var(--muted-foreground)]">
             {description}
           </p>
@@ -83,7 +97,9 @@ function LockedCard({
             </motion.div>
 
             <div className="min-w-0">
-              <h3 className="text-base font-semibold text-[var(--foreground)]">{title}</h3>
+              <h3 className="text-base font-semibold text-[var(--foreground)]">
+                {title}
+              </h3>
               <p className="mt-1 text-sm leading-relaxed text-[var(--muted-foreground)]">
                 {description}
               </p>
@@ -118,6 +134,7 @@ export function AvailablePaths() {
 
   async function handleUnlock() {
     if (!isLoggedIn) {
+      // If you prefer Google first, switch "github" -> "google"
       await signIn("github", { callbackUrl: "/dashboard" });
       return;
     }
@@ -135,7 +152,11 @@ export function AvailablePaths() {
     hidden: reduce ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 },
     show: reduce
       ? { opacity: 1, y: 0 }
-      : { opacity: 1, y: 0, transition: { duration: 0.35, ease: "easeOut" } },
+      : {
+          opacity: 1,
+          y: 0,
+          transition: { duration: 0.35, ease: EASE_OUT },
+        },
   };
 
   return (
@@ -145,14 +166,14 @@ export function AvailablePaths() {
         initial={reduce ? false : { opacity: 0, y: 10 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.25 }}
-        transition={{ duration: reduce ? 0 : 0.35, ease: "easeOut" }}
+        transition={{ duration: reduce ? 0 : 0.35, ease: EASE_OUT }}
       >
         <motion.h2
           className="text-2xl font-semibold text-[var(--foreground)]"
           initial={reduce ? false : { opacity: 0, y: 8 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.7 }}
-          transition={{ duration: reduce ? 0 : 0.3, ease: "easeOut" }}
+          transition={{ duration: reduce ? 0 : 0.3, ease: EASE_OUT }}
         >
           Available paths
         </motion.h2>
@@ -160,7 +181,7 @@ export function AvailablePaths() {
         <motion.div
           className="mt-5 grid gap-4"
           variants={container}
-          initial="hidden"
+          initial={reduce ? false : "hidden"}
           whileInView="show"
           viewport={{ once: true, amount: 0.2 }}
         >
@@ -188,10 +209,12 @@ export function AvailablePaths() {
             initial={reduce ? false : { opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={reduce ? { opacity: 0 } : { opacity: 0, y: -6 }}
-            transition={{ duration: reduce ? 0 : 0.2, ease: "easeOut" }}
+            transition={{ duration: reduce ? 0 : 0.2, ease: EASE_OUT }}
             className="mt-4 text-center text-xs text-[var(--muted-foreground)]"
           >
-            {isLoggedIn ? "Your library is ready in the dashboard." : "Your progress is saved once you log in."}
+            {isLoggedIn
+              ? "Your library is ready in the dashboard."
+              : "Your progress is saved once you log in."}
           </motion.p>
         </AnimatePresence>
       </motion.section>

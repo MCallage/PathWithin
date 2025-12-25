@@ -28,13 +28,15 @@ const steps: Step[] = [
   },
 ];
 
+const EASE_OUT: [number, number, number, number] = [0.16, 1, 0.3, 1];
+
 export function HowItWorks() {
   const reduce = useReducedMotion();
 
   const container = {
     hidden: {},
     show: {
-      transition: reduce ? {} : { staggerChildren: 0.10, delayChildren: 0.05 },
+      transition: reduce ? {} : { staggerChildren: 0.1, delayChildren: 0.05 },
     },
   };
 
@@ -42,7 +44,7 @@ export function HowItWorks() {
     hidden: reduce ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 },
     show: reduce
       ? { opacity: 1, y: 0 }
-      : { opacity: 1, y: 0, transition: { duration: 0.35, ease: "easeOut" } },
+      : { opacity: 1, y: 0, transition: { duration: 0.35, ease: EASE_OUT } },
   };
 
   return (
@@ -53,14 +55,14 @@ export function HowItWorks() {
         initial={reduce ? false : { opacity: 0, y: 10 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.35 }}
-        transition={{ duration: reduce ? 0 : 0.35, ease: "easeOut" }}
+        transition={{ duration: reduce ? 0 : 0.35, ease: EASE_OUT }}
       >
         <motion.h2
           className="text-2xl font-semibold text-[var(--foreground)]"
           initial={reduce ? false : { opacity: 0, y: 8 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.7 }}
-          transition={{ duration: reduce ? 0 : 0.3, ease: "easeOut" }}
+          transition={{ duration: reduce ? 0 : 0.3, ease: EASE_OUT }}
         >
           How it works
         </motion.h2>
@@ -68,7 +70,7 @@ export function HowItWorks() {
         <motion.div
           className="mt-5 grid gap-4 sm:grid-cols-3"
           variants={container}
-          initial="hidden"
+          initial={reduce ? false : "hidden"}
           whileInView="show"
           viewport={{ once: true, amount: 0.25 }}
         >

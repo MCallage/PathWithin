@@ -3,11 +3,7 @@
 import Image from "next/image";
 import { Link } from "next-view-transitions";
 import { FiHeart } from "react-icons/fi";
-import {
-  MotionConfig,
-  motion,
-  useReducedMotion,
-} from "framer-motion";
+import { MotionConfig, motion, useReducedMotion } from "framer-motion";
 
 type FooterLink = {
   label: string;
@@ -25,16 +21,21 @@ const legalLinks: FooterLink[] = [
   { label: "Terms", href: "/terms" },
 ];
 
-function FooterNavLink({ href, label }: FooterLink) {
-  const reduce = useReducedMotion();
+const EASE_OUT: [number, number, number, number] = [0.16, 1, 0.3, 1];
+const EASE_IN_OUT: [number, number, number, number] = [0.65, 0, 0.35, 1];
 
+function FooterNavLink({
+  href,
+  label,
+  navItem,
+}: FooterLink & {
+  navItem: {
+    hidden: any;
+    show: any;
+  };
+}) {
   return (
-    <motion.li
-      initial={reduce ? false : { opacity: 0, y: 6 }}
-      whileInView={reduce ? undefined : { opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.6 }}
-      transition={{ duration: reduce ? 0 : 0.22, ease: "easeOut" }}
-    >
+    <motion.li variants={navItem}>
       <Link
         href={href}
         className="
@@ -65,18 +66,42 @@ export function Footer() {
   const year = new Date().getFullYear();
   const reduce = useReducedMotion();
 
-  const container = {
+  // Containers
+  const blockContainer = {
     hidden: {},
     show: {
       transition: reduce ? {} : { staggerChildren: 0.06, delayChildren: 0.03 },
     },
   };
 
+  const listContainer = {
+    hidden: {},
+    show: {
+      transition: reduce ? {} : { staggerChildren: 0.05, delayChildren: 0.02 },
+    },
+  };
+
+  // Items
   const fadeUp = {
     hidden: reduce ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 },
     show: reduce
       ? { opacity: 1, y: 0 }
-      : { opacity: 1, y: 0, transition: { duration: 0.28, ease: "easeOut" } },
+      : {
+          opacity: 1,
+          y: 0,
+          transition: { duration: 0.28, ease: EASE_OUT },
+        },
+  };
+
+  const navItem = {
+    hidden: reduce ? { opacity: 1, y: 0 } : { opacity: 0, y: 6 },
+    show: reduce
+      ? { opacity: 1, y: 0 }
+      : {
+          opacity: 1,
+          y: 0,
+          transition: { duration: 0.22, ease: EASE_OUT },
+        },
   };
 
   return (
@@ -92,11 +117,11 @@ export function Footer() {
           initial={reduce ? false : { opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.35 }}
-          transition={{ duration: reduce ? 0 : 0.28, ease: "easeOut" }}
+          transition={{ duration: reduce ? 0 : 0.28, ease: EASE_OUT }}
         >
           <motion.div
             className="grid gap-8 sm:grid-cols-3"
-            variants={container}
+            variants={blockContainer}
             initial={reduce ? false : "hidden"}
             whileInView="show"
             viewport={{ once: true, amount: 0.35 }}
@@ -127,7 +152,7 @@ export function Footer() {
                       width={520}
                       height={220}
                       priority={false}
-                      className="h-28 w-auto sm:h-32 select-none"
+                      className="h-28 w-auto select-none sm:h-32"
                     />
                   </div>
                 </Link>
@@ -143,9 +168,16 @@ export function Footer() {
               <h3 className="text-sm font-semibold text-[var(--foreground)]">
                 Explore
               </h3>
-              <motion.ul className="mt-3 space-y-2" variants={container}>
+
+              <motion.ul
+                className="mt-3 space-y-2"
+                variants={listContainer}
+                initial={reduce ? false : "hidden"}
+                whileInView="show"
+                viewport={{ once: true, amount: 0.6 }}
+              >
                 {productLinks.map((l) => (
-                  <FooterNavLink key={l.href} {...l} />
+                  <FooterNavLink key={l.href} {...l} navItem={navItem} />
                 ))}
               </motion.ul>
             </motion.div>
@@ -155,30 +187,35 @@ export function Footer() {
               <h3 className="text-sm font-semibold text-[var(--foreground)]">
                 Legal
               </h3>
-              <motion.ul className="mt-3 space-y-2" variants={container}>
+
+              <motion.ul
+                className="mt-3 space-y-2"
+                variants={listContainer}
+                initial={reduce ? false : "hidden"}
+                whileInView="show"
+                viewport={{ once: true, amount: 0.6 }}
+              >
                 {legalLinks.map((l) => (
-                  <FooterNavLink key={l.href} {...l} />
+                  <FooterNavLink key={l.href} {...l} navItem={navItem} />
                 ))}
               </motion.ul>
             </motion.div>
           </motion.div>
 
-          {/* Divider */}
           <motion.div
             className="my-6 h-px w-full bg-[var(--border)]"
             initial={reduce ? false : { opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: reduce ? 0 : 0.2, ease: "easeOut" }}
+            transition={{ duration: reduce ? 0 : 0.2, ease: EASE_OUT }}
           />
 
-          {/* Bottom line */}
           <motion.div
             className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
             initial={reduce ? false : { opacity: 0, y: 8 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: reduce ? 0 : 0.22, ease: "easeOut" }}
+            transition={{ duration: reduce ? 0 : 0.22, ease: EASE_OUT }}
           >
             <p className="text-xs text-[var(--muted-foreground)]">
               © {year} Paths Within. All rights reserved.
@@ -195,7 +232,7 @@ export function Footer() {
                 animate={reduce ? undefined : { scale: [1, 1.12, 1] }}
                 transition={{
                   duration: 1.6,
-                  ease: "easeInOut",
+                  ease: EASE_IN_OUT,
                   repeat: Infinity,
                   repeatDelay: 1.2,
                 }}

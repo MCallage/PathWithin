@@ -11,6 +11,9 @@ import {
   useReducedMotion,
 } from "framer-motion";
 
+// TS-safe easing
+const EASE_OUT: [number, number, number, number] = [0.16, 1, 0.3, 1];
+
 export function StepsListClient({ journey }: { journey: Journey }) {
   const reduce = useReducedMotion();
 
@@ -51,7 +54,6 @@ export function StepsListClient({ journey }: { journey: Journey }) {
     refreshProgress();
   }, [refreshProgress]);
 
-  // Refresh when returning to the tab/window (helps avoid stale UI)
   useEffect(() => {
     const onFocus = () => refreshProgress();
     const onVis = () => {
@@ -88,7 +90,11 @@ export function StepsListClient({ journey }: { journey: Journey }) {
     hidden: reduce ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 },
     show: reduce
       ? { opacity: 1, y: 0 }
-      : { opacity: 1, y: 0, transition: { duration: 0.25, ease: "easeOut" } },
+      : {
+          opacity: 1,
+          y: 0,
+          transition: { duration: 0.25, ease: EASE_OUT },
+        },
   };
 
   return (
@@ -99,7 +105,6 @@ export function StepsListClient({ journey }: { journey: Journey }) {
         initial={reduce ? false : "hidden"}
         animate="show"
       >
-        {/* Mini progress */}
         <motion.div
           variants={fadeUp}
           className="mb-4 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-4"
@@ -113,7 +118,7 @@ export function StepsListClient({ journey }: { journey: Journey }) {
                 initial={reduce ? false : { opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={reduce ? { opacity: 0 } : { opacity: 0, y: -4 }}
-                transition={{ duration: reduce ? 0 : 0.14, ease: "easeOut" }}
+                transition={{ duration: reduce ? 0 : 0.14, ease: EASE_OUT }}
                 className="text-xs font-medium text-[var(--accent)]"
               >
                 {percent}%
@@ -121,12 +126,12 @@ export function StepsListClient({ journey }: { journey: Journey }) {
             </AnimatePresence>
           </div>
 
-          <div className="mt-2 h-2 w-full rounded-full bg-[var(--secondary)] overflow-hidden">
+          <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-[var(--secondary)]">
             <motion.div
               className="h-full rounded-full bg-[var(--accent)]"
               initial={false}
               animate={{ width: `${percent}%` }}
-              transition={{ duration: reduce ? 0 : 0.5, ease: "easeOut" }}
+              transition={{ duration: reduce ? 0 : 0.5, ease: EASE_OUT }}
             />
           </div>
 
@@ -137,17 +142,20 @@ export function StepsListClient({ journey }: { journey: Journey }) {
                 initial={reduce ? false : { opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={reduce ? { opacity: 0 } : { opacity: 0, y: -6 }}
-                transition={{ duration: reduce ? 0 : 0.16, ease: "easeOut" }}
+                transition={{ duration: reduce ? 0 : 0.16, ease: EASE_OUT }}
                 className="mt-2 text-xs text-[var(--muted-foreground)]"
               >
                 Current:{" "}
-                <span className="text-[var(--foreground)] font-medium">
+                <span className="font-medium text-[var(--foreground)]">
                   Step {Math.max(1, currentIndex + 1)} of {total}
                 </span>
                 {currentTitle ? (
                   <>
                     {" "}
-                    · <span className="text-[var(--muted-foreground)]">{currentTitle}</span>
+                    ·{" "}
+                    <span className="text-[var(--muted-foreground)]">
+                      {currentTitle}
+                    </span>
                   </>
                 ) : null}
               </motion.p>
@@ -157,7 +165,7 @@ export function StepsListClient({ journey }: { journey: Journey }) {
                 initial={reduce ? false : { opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={reduce ? { opacity: 0 } : { opacity: 0, y: -6 }}
-                transition={{ duration: reduce ? 0 : 0.16, ease: "easeOut" }}
+                transition={{ duration: reduce ? 0 : 0.16, ease: EASE_OUT }}
                 className="mt-2 text-xs text-[var(--muted-foreground)]"
               >
                 No progress yet.
@@ -166,7 +174,6 @@ export function StepsListClient({ journey }: { journey: Journey }) {
           </AnimatePresence>
         </motion.div>
 
-        {/* Steps */}
         <motion.div className="grid gap-3" variants={container}>
           {journey.steps.map((s, idx) => {
             const done = completedIds.includes(s.id);
@@ -199,14 +206,18 @@ export function StepsListClient({ journey }: { journey: Journey }) {
                               key="done"
                               initial={reduce ? false : { opacity: 0, y: 4 }}
                               animate={{ opacity: 1, y: 0 }}
-                              exit={reduce ? { opacity: 0 } : { opacity: 0, y: -4 }}
+                              exit={
+                                reduce
+                                  ? { opacity: 0 }
+                                  : { opacity: 0, y: -4 }
+                              }
                               transition={{
                                 duration: reduce ? 0 : 0.14,
-                                ease: "easeOut",
+                                ease: EASE_OUT,
                               }}
                               className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--secondary)] px-3 py-1 text-xs"
                             >
-                              <span className="text-[var(--accent)] font-semibold">
+                              <span className="font-semibold text-[var(--accent)]">
                                 ✓
                               </span>
                               Completed
@@ -216,10 +227,14 @@ export function StepsListClient({ journey }: { journey: Journey }) {
                               key="not"
                               initial={reduce ? false : { opacity: 0, y: 4 }}
                               animate={{ opacity: 1, y: 0 }}
-                              exit={reduce ? { opacity: 0 } : { opacity: 0, y: -4 }}
+                              exit={
+                                reduce
+                                  ? { opacity: 0 }
+                                  : { opacity: 0, y: -4 }
+                              }
                               transition={{
                                 duration: reduce ? 0 : 0.14,
-                                ease: "easeOut",
+                                ease: EASE_OUT,
                               }}
                               className="inline-flex items-center rounded-full border border-[var(--border)] px-3 py-1 text-xs text-[var(--muted-foreground)]"
                             >
@@ -234,10 +249,14 @@ export function StepsListClient({ journey }: { journey: Journey }) {
                               key="current"
                               initial={reduce ? false : { opacity: 0, y: 4 }}
                               animate={{ opacity: 1, y: 0 }}
-                              exit={reduce ? { opacity: 0 } : { opacity: 0, y: -4 }}
+                              exit={
+                                reduce
+                                  ? { opacity: 0 }
+                                  : { opacity: 0, y: -4 }
+                              }
                               transition={{
                                 duration: reduce ? 0 : 0.14,
-                                ease: "easeOut",
+                                ease: EASE_OUT,
                               }}
                               className="inline-flex items-center rounded-full border border-[var(--border)] px-3 py-1 text-xs text-[var(--accent)]"
                             >
