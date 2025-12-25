@@ -1,12 +1,12 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import { useSearchParams } from "next/navigation";
 
-export default function LoginClient() {
-  const params = useSearchParams();
-  const callbackUrl = params.get("callbackUrl") ?? "/dashboard";
+type Props = {
+  callbackUrl: string;
+};
 
+export default function LoginClient({ callbackUrl }: Props) {
   return (
     <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] px-6 pt-10">
       <div className="mx-auto max-w-md rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6">
