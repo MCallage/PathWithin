@@ -5,6 +5,15 @@ export const metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function LoginPage() {
-  return <LoginClient />;
+export default function LoginPage({
+  searchParams,
+}: {
+  searchParams?: { callbackUrl?: string };
+}) {
+  const callbackUrl =
+    typeof searchParams?.callbackUrl === "string" && searchParams.callbackUrl
+      ? searchParams.callbackUrl
+      : "/dashboard";
+
+  return <LoginClient callbackUrl={callbackUrl} />;
 }
