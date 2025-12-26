@@ -15,6 +15,7 @@ import {
   motion,
   useReducedMotion,
 } from "framer-motion";
+import router from "next/router";
 
 type HeaderProps = {
   variant?: "embedded" | "standalone";
@@ -40,7 +41,6 @@ function NavLink({
       className={[
         "relative rounded-full text-sm font-medium",
         "transition-opacity hover:opacity-80",
-        // touch target 44px+
         "inline-flex items-center min-h-[44px] px-4",
         isActive ? "text-[var(--accent)]" : "text-[var(--foreground)]",
         "focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
@@ -74,7 +74,6 @@ function getFocusable(container: HTMLElement | null) {
     )
   );
 
-  // filtra invisíveis/irrelevantes
   return nodes.filter((el) => {
     const style = window.getComputedStyle(el);
     return style.display !== "none" && style.visibility !== "hidden";
@@ -103,21 +102,20 @@ export function Header({ variant = "standalone" }: HeaderProps) {
     setMobileOpen(false);
   }
 
-  // Fecha menu mobile quando muda de rota
   React.useEffect(() => {
     closeMobile();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [pathname]);
 
   async function handleLogin() {
-    await signIn("github", { callbackUrl: "/dashboard" });
-  }
+  const callbackUrl = "/dashboard";
+  router.push(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
+}
 
   async function handleLogout() {
     await signOut({ callbackUrl: "/" });
   }
 
-  // 1) Travar scroll do body quando menu abrir
   React.useEffect(() => {
     if (!mobileOpen) return;
 
@@ -125,7 +123,6 @@ export function Header({ variant = "standalone" }: HeaderProps) {
     const prevOverflow = body.style.overflow;
     const prevPaddingRight = body.style.paddingRight;
 
-    // evita “pulo” quando some a scrollbar
     const scrollbarWidth =
       window.innerWidth - document.documentElement.clientWidth;
 
@@ -138,13 +135,11 @@ export function Header({ variant = "standalone" }: HeaderProps) {
     };
   }, [mobileOpen]);
 
-  // 2) ESC fecha + 3) Focus trap
   React.useEffect(() => {
     if (!mobileOpen) return;
 
     lastActiveRef.current = document.activeElement as HTMLElement | null;
 
-    // foca o primeiro item do painel assim que abrir
     const raf = requestAnimationFrame(() => {
       const focusables = getFocusable(panelRef.current);
       if (focusables[0]) focusables[0].focus();
@@ -176,7 +171,6 @@ export function Header({ variant = "standalone" }: HeaderProps) {
       const last = focusables[focusables.length - 1];
       const active = document.activeElement as HTMLElement | null;
 
-      // se o foco escapou pra fora, traz de volta
       if (!active || !root.contains(active)) {
         e.preventDefault();
         (e.shiftKey ? last : first).focus();
@@ -203,12 +197,11 @@ export function Header({ variant = "standalone" }: HeaderProps) {
     };
   }, [mobileOpen]);
 
-  // devolve foco ao que estava selecionado antes (ou ao botão do menu)
   React.useEffect(() => {
     if (mobileOpen) return;
 
     const el = lastActiveRef.current;
-    // se não existir mais (mudou rota), cai pro botão do menu
+
     if (el && document.contains(el)) el.focus();
     else menuButtonRef.current?.focus();
   }, [mobileOpen]);
@@ -255,7 +248,6 @@ export function Header({ variant = "standalone" }: HeaderProps) {
               </nav>
             </LayoutGroup>
 
-            {/* Logo (left on mobile, centered on desktop) */}
             <div className="col-start-1 md:col-start-2 flex justify-start md:justify-center">
               <motion.div
                 whileHover={reduceMotion ? undefined : { scale: 1.04 }}
@@ -285,11 +277,9 @@ export function Header({ variant = "standalone" }: HeaderProps) {
               </motion.div>
             </div>
 
-            {/* Right: Actions */}
             <div className="col-start-3 flex items-center justify-end gap-3">
               <ThemeToggle />
 
-              {/* Desktop auth */}
               <div className="hidden md:block">
                 {!isLoggedIn ? (
                   <motion.button
@@ -334,7 +324,6 @@ export function Header({ variant = "standalone" }: HeaderProps) {
                 )}
               </div>
 
-              {/* Mobile menu button */}
               <motion.button
                 ref={menuButtonRef}
                 type="button"
@@ -382,31 +371,28 @@ export function Header({ variant = "standalone" }: HeaderProps) {
             </div>
           </div>
 
-          {/* Mobile menu (AnimatePresence) */}
           <AnimatePresence initial={false}>
             {mobileOpen ? (
               <>
-                {/* Backdrop (click to close, not focusable) */}
+                
                 {mounted
-  ? createPortal(
-      <motion.div
-        aria-hidden="true"
-        onClick={closeMobile}
-        className="
-          fixed inset-0 z-40 md:hidden
-          bg-black/20 dark:bg-black/40
-          backdrop-blur-[2px]
-        "
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-      />,
-      document.body
-    )
-  : null}
+                        ? createPortal(
+                            <motion.div
+                                aria-hidden="true"
+                                onClick={closeMobile}
+                                className="
+                                fixed inset-0 z-40 md:hidden
+                                bg-black/20 dark:bg-black/40
+                                backdrop-blur-[2px]
+                                "
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                            />,
+                            document.body
+                            )
+                        : null}
 
-
-                {/* Panel */}
                 <motion.div
                   id="mobile-menu-panel"
                   ref={panelRef}
