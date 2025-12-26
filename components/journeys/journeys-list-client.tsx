@@ -1,9 +1,10 @@
 "use client";
 
 import { Link } from "next-view-transitions";
-import { signIn, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import type { Journey } from "@/lib/journeys";
 import { isJourneyPublic } from "@/lib/journey-access";
+import { useRouter } from "next/navigation";
 import {
   AnimatePresence,
   MotionConfig,
@@ -11,11 +12,11 @@ import {
   useReducedMotion,
 } from "framer-motion";
 
-// TS-safe easings
 const EASE_OUT: [number, number, number, number] = [0.16, 1, 0.3, 1];
 const EASE_IN_OUT: [number, number, number, number] = [0.65, 0, 0.35, 1];
 
 export function JourneysListClient({ journeys }: { journeys: Journey[] }) {
+  const router = useRouter();
   const { status } = useSession();
   const authed = status === "authenticated";
   const reduce = useReducedMotion();
@@ -33,6 +34,10 @@ export function JourneysListClient({ journeys }: { journeys: Journey[] }) {
       ? { opacity: 1, y: 0 }
       : { opacity: 1, y: 0, transition: { duration: 0.28, ease: EASE_OUT } },
   };
+
+  function goToLogin(callbackUrl: string) {
+    router.push(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
+  }
 
   return (
     <MotionConfig reducedMotion="user">
@@ -85,6 +90,9 @@ export function JourneysListClient({ journeys }: { journeys: Journey[] }) {
           {journeys.map((j) => {
             const isPublic = isJourneyPublic(j.slug);
             const locked = !isPublic && !authed;
+
+            const journeyUrl = `/journeys/${j.slug}`;
+            const loginCb = journeyUrl; // para voltar direto pra jornada após login
 
             return (
               <motion.div
@@ -181,6 +189,7 @@ export function JourneysListClient({ journeys }: { journeys: Journey[] }) {
                     {locked ? (
                       <motion.button
                         key="signin"
+                        type="button"
                         initial={reduce ? false : { opacity: 0, y: 6 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={reduce ? { opacity: 0 } : { opacity: 0, y: -6 }}
@@ -189,9 +198,7 @@ export function JourneysListClient({ journeys }: { journeys: Journey[] }) {
                           ease: EASE_OUT,
                         }}
                         whileTap={reduce ? undefined : { scale: 0.98 }}
-                        onClick={() =>
-                          signIn("github", { callbackUrl: `/journeys/${j.slug}` })
-                        }
+                        onClick={() => goToLogin(loginCb)}
                         className="rounded-md bg-[var(--accent)] px-4 py-2 text-sm text-[var(--accent-foreground)] hover:opacity-90"
                       >
                         Sign in to start
@@ -208,7 +215,7 @@ export function JourneysListClient({ journeys }: { journeys: Journey[] }) {
                         }}
                       >
                         <Link
-                          href={`/journeys/${j.slug}`}
+                          href={journeyUrl}
                           className="rounded-md bg-[var(--accent)] px-4 py-2 text-sm text-[var(--accent-foreground)] hover:opacity-90"
                         >
                           View journey
@@ -218,7 +225,7 @@ export function JourneysListClient({ journeys }: { journeys: Journey[] }) {
                   </AnimatePresence>
 
                   <Link
-                    href={`/journeys/${j.slug}`}
+                    href={journeyUrl}
                     className="rounded-md border border-[var(--border)] px-4 py-2 text-sm hover:opacity-90"
                   >
                     Details

@@ -1,10 +1,13 @@
 "use client";
 
+"use client";
+
 import { Link } from "next-view-transitions";
-import { signIn, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { MotionConfig, motion, useReducedMotion } from "framer-motion";
 import { loadProgress } from "@/lib/progress";
+import { useRouter } from "next/navigation";
 
 export function JourneyCTAClient({
   slug,
@@ -13,6 +16,7 @@ export function JourneyCTAClient({
   slug: string;
   isPublic: boolean;
 }) {
+  const router = useRouter();
   const { status } = useSession();
   const authed = status === "authenticated";
   const locked = !isPublic && !authed;
@@ -39,9 +43,11 @@ export function JourneyCTAClient({
     return (
       <MotionConfig reducedMotion="user">
         <motion.button
-          onClick={() =>
-            signIn("github", { callbackUrl: `/journeys/${slug}/start` })
-          }
+          type="button"
+          onClick={() => {
+            const cb = `/journeys/${slug}/start`;
+            router.push(`/login?callbackUrl=${encodeURIComponent(cb)}`);
+          }}
           whileTap={reduce ? undefined : { scale: 0.98 }}
           className="rounded-md bg-[var(--accent)] px-4 py-2 text-sm text-[var(--accent-foreground)] hover:opacity-90"
         >
