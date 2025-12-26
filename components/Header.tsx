@@ -4,9 +4,9 @@ import { createPortal } from "react-dom";
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { FiLogIn, FiLogOut, FiMenu, FiX } from "react-icons/fi";
 import {
   AnimatePresence,
@@ -15,7 +15,6 @@ import {
   motion,
   useReducedMotion,
 } from "framer-motion";
-import router from "next/router";
 
 type HeaderProps = {
   variant?: "embedded" | "standalone";
@@ -81,11 +80,10 @@ function getFocusable(container: HTMLElement | null) {
 }
 
 export function Header({ variant = "standalone" }: HeaderProps) {
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => setMounted(true), []);
 
-    const [mounted, setMounted] = React.useState(false);
-    React.useEffect(() => setMounted(true), []);
-
-
+  const router = useRouter(); // ✅ App Router
   const isStandalone = variant === "standalone";
   const pathname = usePathname();
   const { status } = useSession();
@@ -104,13 +102,12 @@ export function Header({ variant = "standalone" }: HeaderProps) {
 
   React.useEffect(() => {
     closeMobile();
-
   }, [pathname]);
 
-  async function handleLogin() {
-  const callbackUrl = "/dashboard";
-  router.push(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
-}
+  function handleLogin() {
+    const callbackUrl = "/dashboard";
+    router.push(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
+  }
 
   async function handleLogout() {
     await signOut({ callbackUrl: "/" });
@@ -227,7 +224,6 @@ export function Header({ variant = "standalone" }: HeaderProps) {
           }
         >
           <div className="grid items-center md:grid-cols-3 grid-cols-[auto_1fr_auto]">
-            {/* Left: Nav (desktop) */}
             <LayoutGroup id="desktop-nav">
               <nav className="hidden items-center justify-start gap-1 md:flex">
                 <NavLink
@@ -348,15 +344,11 @@ export function Header({ variant = "standalone" }: HeaderProps) {
                   <motion.span
                     key={mobileOpen ? "x" : "menu"}
                     initial={
-                      reduceMotion
-                        ? false
-                        : { opacity: 0, rotate: -20, scale: 0.9 }
+                      reduceMotion ? false : { opacity: 0, rotate: -20, scale: 0.9 }
                     }
                     animate={{ opacity: 1, rotate: 0, scale: 1 }}
                     exit={
-                      reduceMotion
-                        ? { opacity: 0 }
-                        : { opacity: 0, rotate: 20, scale: 0.9 }
+                      reduceMotion ? { opacity: 0 } : { opacity: 0, rotate: 20, scale: 0.9 }
                     }
                     transition={{
                       duration: reduceMotion ? 0 : 0.15,
@@ -374,24 +366,23 @@ export function Header({ variant = "standalone" }: HeaderProps) {
           <AnimatePresence initial={false}>
             {mobileOpen ? (
               <>
-                
                 {mounted
-                        ? createPortal(
-                            <motion.div
-                                aria-hidden="true"
-                                onClick={closeMobile}
-                                className="
-                                fixed inset-0 z-40 md:hidden
-                                bg-black/20 dark:bg-black/40
-                                backdrop-blur-[2px]
-                                "
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                            />,
-                            document.body
-                            )
-                        : null}
+                  ? createPortal(
+                      <motion.div
+                        aria-hidden="true"
+                        onClick={closeMobile}
+                        className="
+                          fixed inset-0 z-40 md:hidden
+                          bg-black/20 dark:bg-black/40
+                          backdrop-blur-[2px]
+                        "
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                      />,
+                      document.body
+                    )
+                  : null}
 
                 <motion.div
                   id="mobile-menu-panel"
@@ -442,9 +433,9 @@ export function Header({ variant = "standalone" }: HeaderProps) {
                       {!isLoggedIn ? (
                         <button
                           type="button"
-                          onClick={async () => {
+                          onClick={() => {
                             closeMobile();
-                            await handleLogin();
+                            handleLogin();
                           }}
                           className="
                             mt-2 inline-flex items-center justify-center gap-2
