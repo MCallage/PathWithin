@@ -24,7 +24,7 @@ export default function Image() {
           fontWeight: 800,
         }}
       >
-        Paths Within Blog
+        Paths Within | Blog <br /> Evidence-based reflections for self-knowledge and emotional clarity.
       </div>
     ),
     size
