@@ -5,13 +5,12 @@ export const metadata = {
   robots: { index: false, follow: false },
 };
 
-type SP = { callbackUrl?: string };
 type LoginPageProps = {
-  searchParams?: SP | Promise<SP>;
+  searchParams?: Promise<{ callbackUrl?: string }>;
 };
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
-  const sp = (await Promise.resolve(searchParams)) ?? {};
+  const sp = (await searchParams) ?? {};
 
   const callbackUrl =
     typeof sp.callbackUrl === "string" && sp.callbackUrl
