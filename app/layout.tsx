@@ -102,6 +102,43 @@ export const metadata: Metadata = {
   },
 };
 
+function SiteJsonLd() {
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: siteConfig.name,
+      url: siteConfig.url,
+      description: siteConfig.description,
+      inLanguage: "en",
+      potentialAction: {
+        "@type": "SearchAction",
+        target: `${siteConfig.url}/blog?q={search_term_string}`,
+        "query-input": "required name=search_term_string",
+      },
+      keywords: "self-knowledge, anxiety, mindfulness, journaling, self-compassion, CBT, ACT",
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: siteConfig.name,
+      url: siteConfig.url,
+      logo: `${siteConfig.url}/apple-touch-icon.png`,
+      sameAs: siteConfig.twitter?.handle
+        ? [`https://twitter.com/${siteConfig.twitter.handle.replace("@", "")}`]
+        : [],
+    },
+  ];
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
+  );
+}
+
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -115,6 +152,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-screen antialiased bg-[var(--background)] text-[var(--foreground)]">
+        <SiteJsonLd />
         <Providers>
           <ThemeProvider>
             <AppShell>{children}</AppShell>

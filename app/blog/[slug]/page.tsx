@@ -34,6 +34,20 @@ function stripHtml(s: string) {
   return (s ?? "").replace(/<[^>]*>/g, "").trim();
 }
 
+function absUrl(pathOrUrl: string) {
+  if (!pathOrUrl) return siteConfig.url;
+  return pathOrUrl.startsWith("http")
+    ? pathOrUrl
+    : `${siteConfig.url}${pathOrUrl.startsWith("/") ? "" : "/"}${pathOrUrl}`;
+}
+
+function toIsoDateOrUndefined(input: unknown) {
+  if (typeof input !== "string") return undefined;
+  const d = new Date(input);
+  if (Number.isNaN(d.getTime())) return undefined;
+  return d.toISOString();
+}
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
 
@@ -46,9 +60,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const title = meta.title ?? "Blog post";
     const description = meta.description ?? siteConfig.description;
 
-    const urlAbs = `${siteConfig.url}/blog/${meta.slug}`;
-    const ogAbs = `${siteConfig.url}${ogPath}`;
-    const twAbs = `${siteConfig.url}${twPath}`;
+    const urlAbs = absUrl(`/blog/${meta.slug}`);
+    const ogAbs = absUrl(ogPath);
+    const twAbs = absUrl(twPath);
+
+    const publishedTime = toIsoDateOrUndefined(meta.date);
+    const tags = (meta.tags ?? []).filter(Boolean);
 
     return {
       title,
@@ -57,6 +74,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       alternates: {
         canonical: `/blog/${meta.slug}`,
       },
+
+      keywords: tags.length ? tags : undefined,
+
+      authors: [{ name: siteConfig.name, url: siteConfig.url }],
 
       robots: {
         index: true,
@@ -77,6 +98,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         description,
         siteName: siteConfig.name,
         locale: siteConfig.locale,
+        publishedTime: publishedTime,
+        modifiedTime: publishedTime,
+        authors: [siteConfig.url],
+        tags: tags.length ? tags : undefined,
         images: [
           {
             url: ogAbs,
@@ -110,18 +135,30 @@ function BlogPostJsonLd({
   description,
   slug,
   date,
+  tags,
+  cover,
 }: {
   title: string;
   description: string;
   slug: string;
   date: string;
+  tags?: string[];
+  cover?: string;
 }) {
-  const url = `${siteConfig.url}/blog/${slug}`;
-  const image = `${siteConfig.url}/blog/${slug}/opengraph-image`;
+  const url = absUrl(`/blog/${slug}`);
+  const blogUrl = absUrl("/blog");
+
+  const ogImage = absUrl(`/blog/${slug}/opengraph-image`);
+  const images = [ogImage];
+
+  if (cover) images.push(absUrl(cover));
+
+  const dateIso = toIsoDateOrUndefined(date);
 
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
+    "@id": `${url}#post`,
     headline: title,
     description: stripHtml(description),
     url,
@@ -129,24 +166,33 @@ function BlogPostJsonLd({
       "@type": "WebPage",
       "@id": url,
     },
-    datePublished: date,
-    dateModified: date,
-    image: [image],
+    isPartOf: {
+      "@type": "Blog",
+      "@id": `${blogUrl}#blog`,
+      name: `Blog | ${siteConfig.name}`,
+      url: blogUrl,
+    },
+    inLanguage: "en",
+    keywords: (tags ?? []).filter(Boolean).join(", ") || undefined,
+    datePublished: dateIso ?? undefined,
+    dateModified: dateIso ?? undefined,
+    image: images,
     author: {
       "@type": "Organization",
+      "@id": `${absUrl("/") }#org`,
       name: siteConfig.name,
-      url: siteConfig.url,
+      url: absUrl("/"),
     },
     publisher: {
       "@type": "Organization",
+      "@id": `${absUrl("/") }#org`,
       name: siteConfig.name,
-      url: siteConfig.url,
+      url: absUrl("/"),
       logo: {
         "@type": "ImageObject",
-        url: `${siteConfig.url}/apple-touch-icon.png`,
+        url: absUrl("/apple-touch-icon.png"),
       },
     },
-    inLanguage: "en",
   };
 
   return (
@@ -156,6 +202,44 @@ function BlogPostJsonLd({
     />
   );
 }
+
+function BlogBreadcrumbJsonLd({ slug, title }: { slug: string; title: string }) {
+  const blogUrl = `${siteConfig.url}/blog`;
+  const postUrl = `${siteConfig.url}/blog/${slug}`;
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: siteConfig.url,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: blogUrl,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: title,
+        item: postUrl,
+      },
+    ],
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
+  );
+}
+
 
 export default async function BlogPostPage({ params }: PageProps) {
   const { slug } = await params;
@@ -171,11 +255,14 @@ export default async function BlogPostPage({ params }: PageProps) {
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-10">
+      <BlogBreadcrumbJsonLd slug={meta.slug} title={meta.title} />
       <BlogPostJsonLd
         title={meta.title}
         description={meta.description}
         slug={meta.slug}
         date={meta.date}
+        tags={meta.tags}
+        cover={meta.cover}
       />
 
       <Link
@@ -253,8 +340,6 @@ export default async function BlogPostPage({ params }: PageProps) {
       <div className="mt-8">
         <ArticleProse>{content}</ArticleProse>
       </div>
-
-
     </main>
   );
 }
