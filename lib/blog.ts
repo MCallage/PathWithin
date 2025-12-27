@@ -6,6 +6,9 @@ import matter from "gray-matter";
 import { compileMDX } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
+import { Callout } from "@/components/mdx/Callout";
+import { Card, CardGrid } from "@/components/mdx/Card";
+
 
 const BLOG_DIR = path.join(process.cwd(), "content", "blog");
 
@@ -117,7 +120,11 @@ export async function getPostBySlug(slug: string) {
       remarkPlugins: [remarkGfm, remarkBreaks],
     },
   },
-  components: {},
+  components: {
+    Callout,
+    Card,
+    CardGrid,
+  },
 });
 
   return { meta, content: mdx.content };
