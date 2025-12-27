@@ -83,7 +83,7 @@ export function Header({ variant = "standalone" }: HeaderProps) {
   const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => setMounted(true), []);
 
-  const router = useRouter(); // ✅ App Router
+  const router = useRouter(); 
   const isStandalone = variant === "standalone";
   const pathname = usePathname();
   const { status } = useSession();
@@ -230,6 +230,13 @@ export function Header({ variant = "standalone" }: HeaderProps) {
                   href="/journeys"
                   label="Journeys"
                   isActive={pathname?.startsWith("/journeys")}
+                  pillId="nav-pill-desktop"
+                />
+
+                <NavLink
+                  href="/blog"
+                  label="Blog"
+                  isActive={pathname?.startsWith("/blog")}
                   pillId="nav-pill-desktop"
                 />
 
@@ -414,6 +421,14 @@ export function Header({ variant = "standalone" }: HeaderProps) {
                         href="/journeys"
                         label="Journeys"
                         isActive={pathname?.startsWith("/journeys")}
+                        onClick={closeMobile}
+                        pillId="nav-pill-mobile"
+                      />
+
+                      <NavLink
+                        href="/blog"
+                        label="Blog"
+                        isActive={pathname?.startsWith("/blog")}
                         onClick={closeMobile}
                         pillId="nav-pill-mobile"
                       />
