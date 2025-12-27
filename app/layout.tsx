@@ -6,6 +6,7 @@ import { siteConfig } from "@/lib/site";
 import { Geist, Source_Sans_3 } from "next/font/google";
 import { AppShell } from "../components/app-shell";
 import { ViewTransitions } from "next-view-transitions";
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 const geist = Geist({
   subsets: ["latin"],
@@ -114,6 +115,7 @@ export default function RootLayout({
             <AppShell>{children}</AppShell>
           </ThemeProvider>
         </Providers>
+        <SpeedInsights />
       </body>
     </html>
     </ViewTransitions>
