@@ -1,35 +1,19 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { siteConfig } from "@/lib/site";
 import { getPostBySlug, getPostSlugs } from "@/lib/blog";
 
 export const runtime = "nodejs";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
 export function generateStaticParams() {
   return getPostSlugs().map((slug) => ({ slug }));
-}
-
-export async function generateMetadata({ params }: PageProps) {
-  const { slug } = await params;
-
-  try {
-    const { meta } = await getPostBySlug(slug);
-    return {
-      title: `${meta.title} | Blog`,
-      description: meta.description,
-      openGraph: {
-        title: meta.title,
-        description: meta.description,
-        type: "article",
-      },
-    };
-  } catch {
-    return { title: "Post | Blog" };
-  }
 }
 
 function formatDate(iso: string) {
@@ -43,6 +27,139 @@ function formatDate(iso: string) {
   } catch {
     return iso;
   }
+}
+
+function stripHtml(s: string) {
+  return (s ?? "").replace(/<[^>]*>/g, "").trim();
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+
+  try {
+    const { meta } = await getPostBySlug(slug);
+
+    const title = meta.title ?? "Blog post";
+    const description = meta.description ?? siteConfig.description;
+
+    const url = `${siteConfig.url}/blog/${meta.slug}`;
+    const ogImage = meta.cover ?? "/opengraph-image.png";
+    const ogImageAbs = ogImage.startsWith("http")
+      ? ogImage
+      : `${siteConfig.url}${ogImage.startsWith("/") ? "" : "/"}${ogImage}`;
+
+    return {
+      title: title,
+      description,
+
+      alternates: {
+        canonical: `/blog/${meta.slug}`,
+      },
+
+      robots: {
+        index: true,
+        follow: true,
+        googleBot: {
+          index: true,
+          follow: true,
+          "max-image-preview": "large",
+          "max-snippet": -1,
+          "max-video-preview": -1,
+        },
+      },
+
+      openGraph: {
+        type: "article",
+        url,
+        title,
+        description,
+        siteName: siteConfig.name,
+        locale: siteConfig.locale,
+        images: [
+          {
+            url: ogImageAbs,
+            width: 1200,
+            height: 630,
+            alt: meta.coverAlt ?? title,
+          },
+        ],
+      },
+
+      twitter: {
+        card: "summary_large_image",
+        title,
+        description,
+        images: [ogImageAbs],
+        creator: siteConfig.twitter.handle || undefined,
+        site: siteConfig.twitter.site || undefined,
+      },
+    };
+  } catch {
+    return {
+      title: "Post | Blog",
+      alternates: { canonical: "/blog" },
+      robots: { index: false, follow: false },
+    };
+  }
+}
+
+function BlogPostJsonLd({
+  title,
+  description,
+  slug,
+  date,
+  cover,
+}: {
+  title: string;
+  description: string;
+  slug: string;
+  date: string;
+  cover?: string;
+}) {
+  const url = `${siteConfig.url}/blog/${slug}`;
+  const image = cover
+    ? cover.startsWith("http")
+      ? cover
+      : `${siteConfig.url}${cover.startsWith("/") ? "" : "/"}${cover}`
+    : `${siteConfig.url}/opengraph-image.png`;
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: title,
+    description: stripHtml(description),
+    url,
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": url,
+    },
+    datePublished: date,
+    dateModified: date,
+    image: [image],
+    author: {
+      "@type": "Organization",
+      name: siteConfig.name,
+      url: siteConfig.url,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: siteConfig.name,
+      url: siteConfig.url,
+      logo: {
+        "@type": "ImageObject",
+        url: `${siteConfig.url}/apple-touch-icon.png`,
+      },
+    },
+    inLanguage: "en",
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      // eslint-disable-next-line react/no-danger
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
+  );
 }
 
 export default async function BlogPostPage({ params }: PageProps) {
@@ -59,6 +176,14 @@ export default async function BlogPostPage({ params }: PageProps) {
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-10">
+      <BlogPostJsonLd
+        title={meta.title}
+        description={meta.description}
+        slug={meta.slug}
+        date={meta.date}
+        cover={meta.cover}
+      />
+
       <Link
         href="/blog"
         className="text-sm text-[var(--muted-foreground)] hover:opacity-80"
@@ -106,6 +231,7 @@ export default async function BlogPostPage({ params }: PageProps) {
 
       <header className="mt-6">
         <h1 className="text-3xl font-semibold">{meta.title}</h1>
+
         <p className="mt-2 text-sm text-[var(--muted-foreground)]">
           {formatDate(meta.date)}
         </p>
