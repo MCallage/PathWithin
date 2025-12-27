@@ -33,7 +33,7 @@ function absUrl(pathOrUrl: string) {
     : `${siteConfig.url}${pathOrUrl.startsWith("/") ? "" : "/"}${pathOrUrl}`;
 }
 
-export function BlogJsonLd({ posts }: { posts: BlogPostMeta[] }) {
+function BlogJsonLd({ posts }: { posts: BlogPostMeta[] }) {
   const blogUrl = absUrl("/blog");
 
   const jsonLd = {
@@ -54,8 +54,7 @@ export function BlogJsonLd({ posts }: { posts: BlogPostMeta[] }) {
         target: `${blogUrl}?q={search_term_string}`,
         "query-input": "required name=search_term_string",
       },
-      keywords: (tags ?? []).join(", "),
-
+      
     },
     publisher: {
       "@type": "Organization",
