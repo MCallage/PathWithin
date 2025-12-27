@@ -18,20 +18,11 @@ export const metadata: Metadata = {
     description: "Evidence-based reflections, guides, and updates from Paths Within.",
     siteName: siteConfig.name,
     locale: siteConfig.locale,
-    images: [
-      {
-        url: "/opengraph-image.png",
-        width: 1200,
-        height: 630,
-        alt: "Paths Within Blog",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: `Blog | ${siteConfig.name}`,
     description: "Evidence-based reflections, guides, and updates from Paths Within.",
-    images: ["/twitter-image.png"],
   },
 };
 
@@ -53,7 +44,6 @@ function BlogJsonLd() {
   return (
     <script
       type="application/ld+json"
-      // eslint-disable-next-line react/no-danger
       dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
     />
   );

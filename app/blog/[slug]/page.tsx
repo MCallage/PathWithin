@@ -36,20 +36,21 @@ function stripHtml(s: string) {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
 
+  const ogPath = `/blog/${slug}/opengraph-image`;
+  const twPath = `/blog/${slug}/twitter-image`;
+
   try {
     const { meta } = await getPostBySlug(slug);
 
     const title = meta.title ?? "Blog post";
     const description = meta.description ?? siteConfig.description;
 
-    const url = `${siteConfig.url}/blog/${meta.slug}`;
-    const ogImage = meta.cover ?? "/opengraph-image.png";
-    const ogImageAbs = ogImage.startsWith("http")
-      ? ogImage
-      : `${siteConfig.url}${ogImage.startsWith("/") ? "" : "/"}${ogImage}`;
+    const urlAbs = `${siteConfig.url}/blog/${meta.slug}`;
+    const ogAbs = `${siteConfig.url}${ogPath}`;
+    const twAbs = `${siteConfig.url}${twPath}`;
 
     return {
-      title: title,
+      title,
       description,
 
       alternates: {
@@ -70,14 +71,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
       openGraph: {
         type: "article",
-        url,
+        url: urlAbs,
         title,
         description,
         siteName: siteConfig.name,
         locale: siteConfig.locale,
         images: [
           {
-            url: ogImageAbs,
+            url: ogAbs,
             width: 1200,
             height: 630,
             alt: meta.coverAlt ?? title,
@@ -89,7 +90,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         card: "summary_large_image",
         title,
         description,
-        images: [ogImageAbs],
+        images: [twAbs],
         creator: siteConfig.twitter.handle || undefined,
         site: siteConfig.twitter.site || undefined,
       },
@@ -108,20 +109,14 @@ function BlogPostJsonLd({
   description,
   slug,
   date,
-  cover,
 }: {
   title: string;
   description: string;
   slug: string;
   date: string;
-  cover?: string;
 }) {
   const url = `${siteConfig.url}/blog/${slug}`;
-  const image = cover
-    ? cover.startsWith("http")
-      ? cover
-      : `${siteConfig.url}${cover.startsWith("/") ? "" : "/"}${cover}`
-    : `${siteConfig.url}/opengraph-image.png`;
+  const image = `${siteConfig.url}/blog/${slug}/opengraph-image`;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -156,7 +151,6 @@ function BlogPostJsonLd({
   return (
     <script
       type="application/ld+json"
-      // eslint-disable-next-line react/no-danger
       dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
     />
   );
@@ -181,7 +175,6 @@ export default async function BlogPostPage({ params }: PageProps) {
         description={meta.description}
         slug={meta.slug}
         date={meta.date}
-        cover={meta.cover}
       />
 
       <Link
