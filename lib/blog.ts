@@ -4,6 +4,8 @@ import fs from "node:fs";
 import path from "node:path";
 import matter from "gray-matter";
 import { compileMDX } from "next-mdx-remote/rsc";
+import remarkGfm from "remark-gfm";
+import remarkBreaks from "remark-breaks";
 
 const BLOG_DIR = path.join(process.cwd(), "content", "blog");
 
@@ -108,10 +110,16 @@ export async function getPostBySlug(slug: string) {
   const meta = toMeta(slug, data);
 
   const mdx = await compileMDX({
-    source: content,
-    options: { parseFrontmatter: false },
-    components: {},
-  });
+  source: content,
+  options: {
+    parseFrontmatter: false,
+    mdxOptions: {
+      remarkPlugins: [remarkGfm, remarkBreaks],
+    },
+  },
+  components: {},
+});
 
   return { meta, content: mdx.content };
+
 }

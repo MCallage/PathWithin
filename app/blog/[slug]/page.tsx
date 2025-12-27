@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { siteConfig } from "@/lib/site";
 import { getPostBySlug, getPostSlugs } from "@/lib/blog";
+import { ArticleProse } from "@/components/blog/ArticleProse";
 
 export const runtime = "nodejs";
 
@@ -249,9 +250,11 @@ export default async function BlogPostPage({ params }: PageProps) {
         ) : null}
       </header>
 
-      <article className="prose prose-neutral dark:prose-invert mt-8 max-w-none">
-        {content}
-      </article>
+      <div className="mt-8">
+        <ArticleProse>{content}</ArticleProse>
+      </div>
+
+
     </main>
   );
 }
